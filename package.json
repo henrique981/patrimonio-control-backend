@@ -1,5 +1,5 @@
-﻿{
-  "name": "backend",
+{
+  "name": "patrimonio-control-backend",
   "version": "1.0.0",
   "description": "Patrimonio Control API",
   "main": "src/server.js",
@@ -9,6 +9,5 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+  "license": "ISC"
 }
