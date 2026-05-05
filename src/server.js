@@ -5,6 +5,8 @@ const fs = require('fs');
 const path = require('path');
 require('dotenv').config();
 
+const authRoutes = require('./routes/auth');
+
 const app = express();
 
 app.use(cors());
@@ -13,6 +15,8 @@ app.use(express.json());
 app.get('/', (req, res) => {
   res.json({ message: 'Patrim?nio Control API funcionando!' });
 });
+
+app.use('/auth', authRoutes);
 
 app.get('/setup', async (req, res) => {
   try {
