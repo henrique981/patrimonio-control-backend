@@ -9,7 +9,7 @@ const authRoutes = require('./routes/auth');
 const patrimonioRoutes = require('./routes/patrimonio');
 
 const app = express();
-app.use(cors());
+app.use(cors({ origin: ['https://patrimonio-control-frontend.vercel.app', 'http://localhost:3000', 'http://localhost:5173'], methods: ['GET','POST','PUT','DELETE','OPTIONS'], allowedHeaders: ['Content-Type','Authorization'] }));
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -35,3 +35,4 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
+
