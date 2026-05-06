@@ -651,4 +651,91 @@ router.get('/setup-patrimonio', async (req, res) => {
   }
 });
 
+// Adicionar em auth.js antes de module.exports = router;
+// Acessar: GET /auth/update-viaturas
+
+router.get('/update-viaturas', async (req, res) => {
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Limpa as viaturas antigas e recria com dados completos do PDF
+    await client.query(`DELETE FROM assuncao_vtr_fotos`);
+    await client.query(`DELETE FROM assuncao_vtr`);
+    await client.query(`DELETE FROM viaturas`);
+
+    const viaturas = [
+      // [patrimonio, prefixo, placa, marca, modelo, chassi, renavam, ano_fab, ano_mod, valor, situacao]
+      ['225029010','I-06520','TJQ5C61','RENAULT','DUSTER ZEN 16','93YHJD209TJ356031','1459309585',2025,2026,132399.00,'operacional'],
+      ['224048531','I-06560','TJS4F44','CHEVROLET','SPIN 1.8L MT LT','9BGJB7520SB183484','1408698657',2024,2024,130550.00,'operacional'],
+      ['224034770','I-06510','SWU7G24','CHEVROLET','SPIN 1.8L MT','9BGJB7520SB183134','1408664183',2024,2024,130500.00,'operacional'],
+      ['223036928','I-06588','SST0D74','YAMAHA','XTZ250 LANDER','9C6DG3320P0109784','1367975309',2023,2023,32100.00,'operacional'],
+      ['223036929','I-06589','SUX6F51','YAMAHA','XTZ250 LANDER','9C6DG3320P0109781','1367975457',2023,2023,32100.00,'operacional'],
+      ['222082897','I-06551','FHR5J93','CHEVROLET','SPIN 18L AT PREMIER','9BGJP7520PB190443','1331712936',2022,2022,120500.00,'operacional'],
+      ['222082913','I-06550','GIR1D84','CHEVROLET','SPIN 18L AT PREMIER','9BGJP7520PB190224','1331711239',2022,2022,120500.00,'operacional'],
+      ['222041405','I-06584','CFY0F36','YAMAHA','LANDER XTZ250','9C6DG3320N0065722','1323720186',2022,2022,33800.00,'operacional'],
+      ['222041406','I-06585','FUV0D71','YAMAHA','LANDER XTZ250','9C6DG3320N0065727','1323721085',2022,2022,33800.00,'operacional'],
+      ['222041407','I-06586','GFX4G62','YAMAHA','LANDER XTZ250','9C6DG3320N0065733','1323721310',2022,2022,33800.00,'operacional'],
+      ['222041408','I-06587','CCU6E53','YAMAHA','LANDER XTZ250','9C6DG3320N0065730','1323721719',2022,2022,33800.00,'operacional'],
+      ['222010943','I-06500','GGR1B85','CHEVROLET','SPIN 18L AT PREMIER','9BGJP7520NB178795','1292449559',2022,2022,110200.00,'operacional'],
+      ['222010944','I-06534','EXO7I57','CHEVROLET','SPIN 18L AT PREMIER','9BGJP7520NB178867','1292449664',2022,2022,110200.00,'operacional'],
+      ['222010945','I-06535','FIY4C36','CHEVROLET','SPIN 18L AT PREMIER','9BGJP7520NB179096','1292449990',2022,2022,110200.00,'operacional'],
+      ['221038707','I-06532','GCQ8F46','RENAULT','DUSTER','93YHJD204NJ114699','1278864781',2021,2022,96000.00,'operacional'],
+      ['221038708','I-06533','FYY2G97','RENAULT','DUSTER','93YHJD209NJ114567','1278818771',2021,2022,96000.00,'operacional'],
+      ['221012757','I-06523','FQU0E18','RENAULT','DUSTER 16 E 4X2','93YHJD206NJ797098','1256623676',2021,2021,57450.00,'operacional'],
+      ['221012785','I-06531','GDS5H96','RENAULT','DUSTER 16 E 4X2','93YHJD207NJ797076','1256619237',2021,2021,57450.00,'operacional'],
+      ['221012794','I-06530','ECW0G27','RENAULT','DUSTER 16 E 4X2','93YHJD208NJ797037','1256662868',2021,2021,57450.00,'operacional'],
+      ['220009408','I-06517','EJF5I29','VW','GOL PATRULHEIRO 1.6','9BWAB45U3MT002109','1231092863',2020,2020,44050.00,'operacional'],
+      ['219026928','I-06522','FPU0546','VW','GOL PATRULHEIRO 1.6','9BWAB45U9LT076116','1212061095',2019,2020,44050.00,'operacional'],
+      ['219002240','I-06514','CMM5193','MERCEDES-BENZ','SPRINTER FFORMA','8AC906633KE171433','1206409417',2019,2020,151300.00,'operacional'],
+      ['219004066','I-06583','DJL1624','HONDA','XRE 300','9C2ND1120KR002794','1198305794',2019,2020,26000.00,'operacional'],
+      ['219023464','I-06518','CUC3590','CHEVROLET','SPIN 1.8L MT LT','9BGJD7520LB152240','1212061273',2019,2020,57500.00,'operacional'],
+      ['219023774','I-06515','CQU0798','CHEVROLET','SPIN 1.8L MT LT','9BGJD7520LB147028','1213051468',2019,2020,57500.00,'operacional'],
+      // DESCARGA
+      ['219023417','SEM-PREFIXO-1','BYQ6925','CHEVROLET','SPIN 1.8L MT LT','9BGJD7520LB147565','1213673876',2019,2020,57500.00,'descarga'],
+      ['219026925','SEM-PREFIXO-2','EQU1537','VW','GOL PATRULHEIRO 1.6','9BWAB45UXLT074827','1212059422',2019,2020,44050.00,'descarga'],
+      ['220000033','SEM-PREFIXO-3','FZN3635','RENAULT','DUSTER 16 E 4X2','93YHSR3H5LJ194815','1221171396',2019,2020,57450.00,'descarga'],
+      ['220007226','SEM-PREFIXO-4','FPJ0H96','RENAULT','DUSTER 16 E 4X2','93YHJD205MJ448416','1229266744',2020,2020,57450.00,'descarga'],
+      ['215047222','SEM-PREFIXO-5','FZQ5684','CHEVROLET','SPIN 1.8L MT LT','9BGJB75E0GB133080','1066079347',2015,2015,58010.37,'descarga'],
+      ['218034094','SEM-PREFIXO-6','DMM7512','CHEVROLET','SPIN 1.8L MT LT','9BGJG7520KB134030','1171385304',2018,2018,53700.00,'descarga'],
+      ['218034095','SEM-PREFIXO-7','EUV2006','CHEVROLET','SPIN 1.8L MT LT','9BGJG7520KB134046','1171418245',2018,2018,53700.00,'descarga'],
+      ['219004065','SEM-PREFIXO-8','DJL1562','HONDA','XRE 300','9C2ND1120KR002788','1198303678',2019,2020,26000.00,'descarga'],
+      ['219007052','SEM-PREFIXO-9','CFZ4587','CHEVROLET','SPIN 1.8L MT LT','9BGJD7520LB101472','1197054542',2019,2020,49750.00,'descarga'],
+      ['219007063','SEM-PREFIXO-10','BXC5874','CHEVROLET','SPIN 1.8L MT LT','9BGJD7520LB110774','1200617891',2019,2020,49750.00,'descarga'],
+      ['212067345','SEM-PREFIXO-11','DJM6191','FIAT','PALIO WEEK TREKKING','9BD373184D5017466','496610767',2012,2013,42410.00,'descarga'],
+      ['212067573','SEM-PREFIXO-12','BYY0349','YAMAHA','LANDER XTZ250','9C6KG0210D0055212','499429990',2012,2013,15000.00,'descarga'],
+      ['212067597','SEM-PREFIXO-13','BYY0373','YAMAHA','LANDER XTZ250','9C6KG0210D0055290','499423623',2012,2013,15000.00,'descarga'],
+      ['213052610','SEM-PREFIXO-14','CFY4680','VW','SPACEFOX','9BWPB45Z9E4052935','593525680',2013,2014,46000.00,'descarga'],
+      ['214032090','SEM-PREFIXO-15','EEF9552','VW','SPACEFOX PAT MA','9BWPB45Z2E4148115','1012269652',2014,2014,46000.00,'descarga'],
+    ];
+
+    for (const [pat, prefixo, placa, marca, modelo, chassi, renavam, ano_fab, ano_mod, valor, situacao] of viaturas) {
+      await client.query(`
+        INSERT INTO viaturas
+        (patrimonio, prefixo, placa, marca, modelo, chassi, renavam,
+         ano_fabricacao, ano_modelo, valor, unidade_opm, situacao, km_atual, combustivel)
+        VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,'606065000',$11,0,'flex')
+        ON CONFLICT (patrimonio) DO UPDATE SET
+          prefixo=EXCLUDED.prefixo, placa=EXCLUDED.placa,
+          marca=EXCLUDED.marca, modelo=EXCLUDED.modelo,
+          chassi=EXCLUDED.chassi, renavam=EXCLUDED.renavam,
+          ano_fabricacao=EXCLUDED.ano_fabricacao, ano_modelo=EXCLUDED.ano_modelo,
+          valor=EXCLUDED.valor, situacao=EXCLUDED.situacao
+      `, [pat, prefixo, placa, marca, modelo, chassi, renavam, ano_fab, ano_mod, valor, situacao]);
+    }
+
+    await client.query('COMMIT');
+
+    const r = await client.query(`SELECT situacao, COUNT(*) FROM viaturas GROUP BY situacao`);
+    res.json({ ok: true, mensagem: 'Viaturas atualizadas!', totais: r.rows });
+
+  } catch (err) {
+    await client.query('ROLLBACK');
+    res.status(500).json({ ok: false, erro: err.message });
+  } finally {
+    client.release();
+  }
+});
+
+
 module.exports = router;
