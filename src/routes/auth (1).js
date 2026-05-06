@@ -599,9 +599,9 @@ router.get('/setup-patrimonio', async (req, res) => {
       await client.query(`
         INSERT INTO armas
         (patrimonio,n_serie,nome_material,especificacoes,conta_pat,unidade_opm,valor,fabricante,uge)
-        VALUES ($1,$2,$3,$3,'123110901','606065000',$4,$5,$6)
+        VALUES ($1,$2,$3,$4,'123110901','606065000',$5,$6,$7)
         ON CONFLICT (patrimonio) DO NOTHING
-      `, [pat, serie, nome, valor, fab, uge]);
+      `, [pat, serie, nome, nome, valor, fab, uge]);
     }
 
     // DADOS: viaturas 606065000
