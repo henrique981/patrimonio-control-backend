@@ -659,6 +659,9 @@ router.get('/update-viaturas', async (req, res) => {
   try {
     await client.query('BEGIN');
 
+    // Adiciona coluna valor se não existir
+    await client.query(`ALTER TABLE viaturas ADD COLUMN IF NOT EXISTS valor NUMERIC(12,2)`);
+
     // Limpa as viaturas antigas e recria com dados completos do PDF
     await client.query(`DELETE FROM assuncao_vtr_fotos`);
     await client.query(`DELETE FROM assuncao_vtr`);
