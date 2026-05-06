@@ -146,6 +146,10 @@ router.get('/setup-patrimonio', async (req, res) => {
       )
     `);
 
+    await client.query(`DROP TABLE IF EXISTS assuncao_vtr_fotos CASCADE`);
+    await client.query(`DROP TABLE IF EXISTS assuncao_vtr CASCADE`);
+    await client.query(`DROP TABLE IF EXISTS viaturas CASCADE`);
+
     await client.query(`
       CREATE TABLE IF NOT EXISTS viaturas (
         id SERIAL PRIMARY KEY,
