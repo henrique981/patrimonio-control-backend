@@ -674,6 +674,19 @@ router.get('/fix-situacao-viaturas', async (req, res) => {
   }
 });
 
+
+router.get('/fix-baixada', async (req, res) => {
+  try {
+    await pool.query(`ALTER TABLE viaturas DROP CONSTRAINT IF EXISTS viaturas_situacao_check`);
+    await pool.query(`UPDATE viaturas SET situacao = 'baixada' WHERE situacao = 'baixar'`);
+    await pool.query(`ALTER TABLE viaturas ADD CONSTRAINT viaturas_situacao_check CHECK (situacao IN ('operacional','baixada','descarga'))`);
+    const r = await pool.query(`SELECT situacao, COUNT(*) FROM viaturas GROUP BY situacao`);
+    res.json({ ok: true, totais: r.rows });
+  } catch (err) {
+    res.status(500).json({ ok: false, erro: err.message });
+  }
+});
+
 module.exports = router;
 // Acessar: GET /auth/update-viaturas
 
@@ -782,6 +795,19 @@ router.get('/fix-situacao-viaturas', async (req, res) => {
     await pool.query(`UPDATE viaturas SET situacao = 'baixada' WHERE situacao IN ('em_manutencao','inservivel','aguardando_liberacao','reserva')`);
     const r = await pool.query(`SELECT situacao, COUNT(*) FROM viaturas GROUP BY situacao`);
     res.json({ ok: true, mensagem: 'Situações atualizadas!', totais: r.rows });
+  } catch (err) {
+    res.status(500).json({ ok: false, erro: err.message });
+  }
+});
+
+
+router.get('/fix-baixada', async (req, res) => {
+  try {
+    await pool.query(`ALTER TABLE viaturas DROP CONSTRAINT IF EXISTS viaturas_situacao_check`);
+    await pool.query(`UPDATE viaturas SET situacao = 'baixada' WHERE situacao = 'baixar'`);
+    await pool.query(`ALTER TABLE viaturas ADD CONSTRAINT viaturas_situacao_check CHECK (situacao IN ('operacional','baixada','descarga'))`);
+    const r = await pool.query(`SELECT situacao, COUNT(*) FROM viaturas GROUP BY situacao`);
+    res.json({ ok: true, totais: r.rows });
   } catch (err) {
     res.status(500).json({ ok: false, erro: err.message });
   }
