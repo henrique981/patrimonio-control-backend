@@ -7,9 +7,14 @@ require('dotenv').config();
 
 const authRoutes = require('./routes/auth');
 const patrimonioRoutes = require('./routes/patrimonio');
+const assuncaoRoutes = require('./routes/assuncao');
 
 const app = express();
-app.use(cors({ origin: ['https://patrimonio-control-frontend.vercel.app', 'http://localhost:3000', 'http://localhost:5173'], methods: ['GET','POST','PUT','DELETE','OPTIONS'], allowedHeaders: ['Content-Type','Authorization'] }));
+app.use(cors({
+  origin: ['https://patrimonio-control-frontend.vercel.app', 'http://localhost:3000', 'http://localhost:5173'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 app.get('/', (req, res) => {
@@ -18,6 +23,7 @@ app.get('/', (req, res) => {
 
 app.use('/auth', authRoutes);
 app.use('/patrimonio', patrimonioRoutes);
+app.use('/assuncao', assuncaoRoutes);
 
 app.get('/setup', async (req, res) => {
   try {
@@ -35,4 +41,3 @@ app.listen(PORT, () => {
 });
 
 module.exports = app;
-
