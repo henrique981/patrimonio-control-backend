@@ -148,7 +148,8 @@ router.post('/:prefixo/foto', async (req, res) => {
 
     res.json({ ok: true, url: upload.secure_url });
   } catch (err) {
-    res.status(500).json({ ok: false, erro: err.message });
+    console.error('ERRO FOTO:', err);
+    res.status(500).json({ ok: false, erro: err.message, stack: err.stack });
   }
 });
 
