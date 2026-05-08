@@ -687,6 +687,30 @@ router.get('/fix-baixada', async (req, res) => {
   }
 });
 
+
+router.get('/test-cloudinary', async (req, res) => {
+  try {
+    const cloudinary = require('cloudinary').v2;
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+    const result = await cloudinary.api.ping();
+    res.json({ 
+      ok: true, 
+      cloudinary: result,
+      config: {
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY ? 'configurado' : 'NAO CONFIGURADO',
+        api_secret: process.env.CLOUDINARY_API_SECRET ? 'configurado' : 'NAO CONFIGURADO'
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ ok: false, erro: err.message });
+  }
+});
+
 module.exports = router;
 // Acessar: GET /auth/update-viaturas
 
@@ -808,6 +832,30 @@ router.get('/fix-baixada', async (req, res) => {
     await pool.query(`ALTER TABLE viaturas ADD CONSTRAINT viaturas_situacao_check CHECK (situacao IN ('operacional','baixada','descarga'))`);
     const r = await pool.query(`SELECT situacao, COUNT(*) FROM viaturas GROUP BY situacao`);
     res.json({ ok: true, totais: r.rows });
+  } catch (err) {
+    res.status(500).json({ ok: false, erro: err.message });
+  }
+});
+
+
+router.get('/test-cloudinary', async (req, res) => {
+  try {
+    const cloudinary = require('cloudinary').v2;
+    cloudinary.config({
+      cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+      api_key: process.env.CLOUDINARY_API_KEY,
+      api_secret: process.env.CLOUDINARY_API_SECRET,
+    });
+    const result = await cloudinary.api.ping();
+    res.json({ 
+      ok: true, 
+      cloudinary: result,
+      config: {
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY ? 'configurado' : 'NAO CONFIGURADO',
+        api_secret: process.env.CLOUDINARY_API_SECRET ? 'configurado' : 'NAO CONFIGURADO'
+      }
+    });
   } catch (err) {
     res.status(500).json({ ok: false, erro: err.message });
   }
