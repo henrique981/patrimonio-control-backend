@@ -386,11 +386,20 @@ router.delete('/viaturas/:prefixo', async (req, res) => {
 // ============================================================
 router.get('/resumo', async (req, res) => {
   try {
-    const itens     = await pool.query(`SELECT situacao, COUNT(*) as total FROM itens_patrimoniais GROUP BY situacao`);
-    const armas     = await pool.query(`SELECT situacao, COUNT(*) as total FROM armas GROUP BY situacao`);
-    const viaturas  = await pool.query(`SELECT situacao, COUNT(*) as total FROM viaturas GROUP BY situacao`);
-    const valor     = await pool.query(`SELECT SUM(valor) as total FROM itens_patrimoniais`);
+    const itens      = await pool.query(`SELECT situacao, COUNT(*) as total FROM itens_patrimoniais GROUP BY situacao`);
+    const armas      = await pool.query(`SELECT situacao, COUNT(*) as total FROM armas GROUP BY situacao`);
+    const viaturas   = await pool.query(`
+      SELECT situacao, COUNT(*) as total FROM viaturas 
+      GROUP BY situacao 
+      ORDER BY CASE situacao 
+        WHEN 'operacional' THEN 1 
+        WHEN 'baixada' THEN 2 
+        WHEN 'descarga' THEN 3 
+        ELSE 4 END
+    `);
+    const valor      = await pool.query(`SELECT SUM(valor) as total FROM itens_patrimoniais`);
     const valorArmas = await pool.query(`SELECT SUM(valor) as total FROM armas`);
+    const valorVtrs  = await pool.query(`SELECT SUM(valor) as total FROM viaturas`);
 
     res.json({
       ok: true,
@@ -399,7 +408,8 @@ router.get('/resumo', async (req, res) => {
         armas: armas.rows,
         viaturas: viaturas.rows,
         valor_total_itens: parseFloat(valor.rows[0].total || 0).toFixed(2),
-        valor_total_armas: parseFloat(valorArmas.rows[0].total || 0).toFixed(2)
+        valor_total_armas: parseFloat(valorArmas.rows[0].total || 0).toFixed(2),
+        valor_total_viaturas: parseFloat(valorVtrs.rows[0].total || 0).toFixed(2)
       }
     });
   } catch (err) {
